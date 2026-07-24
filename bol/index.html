@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>ticket camping</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; background:linear-gradient(135deg,#f3f7fb,#dde8f7); margin:0; padding:20px; }
+    h1, h2 { text-align:center; }
+    .container { max-width:1200px; margin:0 auto; }
+    .card { background:white; padding:20px; border-radius:14px; margin-top:20px; }
+    select, input { width:100%; padding:10px; font-size:16px; margin-bottom:10px; }
+    button { padding:14px; font-size:16px; border:none; border-radius:10px; background:black; color:white; cursor:pointer; width:100%; }
+    button:disabled { background:#aaa; cursor:not-allowed; }
+    svg { width:100%; height:auto; background:#dfe6ec; border-radius:16px; }
+    .seat { fill:#b0bec5; cursor:pointer; }
+    .seat:hover { fill:#3498db; }
+    .seat.selected { fill:#2ecc71; }
+    .seat.occupied { fill:#555; cursor:not-allowed; }
+
+    /* ===== MÉTODOS DE PAGO ===== */
+    .metodos-pago { display:flex; flex-direction:column; gap:24px; }
+    .grupo-pago h3 { margin-bottom:10px; }
+    .opcion-pago {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:16px;
+      margin-bottom:8px;
+      cursor:pointer;
+    }
+    .opcion-pago input {
+      width:18px;
+      height:18px;
+      margin:0;
+    }
+/* Aquí terminan todos tus estilos actuales */
+
+.modalTarjeta{
+
+display:none;
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+background:rgba(0,0,0,.65);
+
+justify-content:center;
+
+align-items:center;
+
+z-index:9999;
+
+}
+
+.contenidoTarjeta{
+
+background:#fff;
+
+padding:30px;
+
+width:430px;
+
+border-radius:15px;
+
+text-align:center;
+
+}
+
+.contenidoTarjeta h2{
+
+color:#000;
+
+margin-bottom:18px;
+
+}
+
+.contenidoTarjeta p{
+
+line-height:1.7;
+
+color:#555;
+
+margin-bottom:25px;
+
+}
+
+/* Aquí sigue el cierre del CSS */
+
+  </style>
+</head>
+<body>
+
+<h1> Estadio El Campín </h1>
+<p style="text-align:center">Selección de asientos por localidad</p>
+
+<div class="container">
+
+  <div class="card">
+
+    <h2>Datos del comprador</h2>
+
+    <form autocomplete="off">
+
+        <input
+            id="nombre"
+            name="nombre_cliente"
+            placeholder="Nombre completo"
+            autocomplete="off">
+
+        <input
+            id="documento"
+            name="documento_cliente"
+            placeholder="Documento"
+            autocomplete="off">
+
+        <input
+            id="correo"
+            name="correo_cliente"
+            placeholder="Correo electrónico"
+            autocomplete="off">
+
+        <input
+            id="telefono"
+            name="telefono_cliente"
+            placeholder="Teléfono"
+            maxlength="10"
+            autocomplete="off">
+
+    </form>
+
+</div>
+
+  <div class="card">
+    <h2>Localidad</h2>
+    <select id="localidad" disabled>
+      <option value="" selected disabled>Seleccione una tribuna</option>
+      <option value="Occidental Baja">Occidental Baja</option>
+      <option value="Occidental Alta">Occidental Alta</option>
+      <option value="Oriental Baja">Oriental Baja</option>
+      <option value="Oriental Alta">Oriental Alta</option>
+      <option value="Norte Baja">Norte Baja</option>
+      <option value="Norte Alta">Norte Alta</option>
+    </select>
+  </div>
+
+  <div class="card" id="mapCard">
+    <div style="display:flex; gap:20px; justify-content:center; margin-bottom:15px; font-size:14px">
+      <div><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#b0bec5;margin-right:6px"></span>Disponible</div>
+      <div><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#555;margin-right:6px"></span>Ocupado</div>
+      <div><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#2ecc71;margin-right:6px"></span>Seleccionado</div>
+    </div>
+    <h2 id="tituloLocalidad"></h2>
+
+    <svg id="mapaOccidentalBaja" viewBox="0 0 1000 700" style="display:none"><g id="asientosOccidentalBaja"></g></svg>
+    <svg id="mapaOccidentalAlta" viewBox="0 0 1000 600" style="display:none"><g id="asientosOccidentalAlta"></g></svg>
+    <svg id="mapaOrientalBaja" viewBox="0 0 1000 700" style="display:none"><g id="asientosOrientalBaja"></g></svg>
+    <svg id="mapaOrientalAlta" viewBox="0 0 1000 600" style="display:none"><g id="asientosOrientalAlta"></g></svg>
+    <svg id="mapaNorteBaja" viewBox="0 0 1000 650" style="display:none"><g id="asientosNorteBaja"></g></svg>
+    <svg id="mapaNorteAlta" viewBox="0 0 1000 750" style="display:none"><g id="asientosNorteAlta"></g></svg>
+  </div>
+
+  <div class="card" id="confirm" style="display:none">
+    <h2>Confirmación</h2>
+    <p id="resumen"></p>
+    <button id="btnConfirmar" disabled>Confirmar asientos</button>
+  </div>
+
+  <div class="card" id="carrito" style="display:none">
+    <h2>🛒 Carrito de compras</h2>
+    <p id="mensajeCarrito" style="font-weight:bold"></p>
+
+    <div style="margin-top:15px">
+      <p><strong>Localidad:</strong> <span id="carritoLocalidad"></span></p>
+      <p><strong>Asientos seleccionados:</strong></p>
+      <ul id="listaAsientos"></ul>
+      <p><strong>Cantidad:</strong> <span id="cantidadBoletas"></span> boleta(s)</p>
+    </div>
+
+    <hr />
+
+    <div style="margin-top:15px">
+      <p>Precio por boleta: <strong>$<span id="precioBoleta"></span></strong></p>
+      <p>Servicio: <strong>$10.000</strong></p>
+      <h3>TOTAL: $<span id="totalCompra"></span> COP</h3>
+    </div>
+
+    <h3 id="timer" style="margin-top:20px"></h3>
+
+    <div style="display:flex; gap:15px; margin-top:20px">
+      <button style="background:#777" onclick="modificarSeleccion()">Modificar tu selección</button>
+      <button style="background:#2ecc71" onclick="continuarPago()">Continuar con el pago</button>
+    </div>
+  </div>
+
+  <div class="card" id="pago" style="display:none">
+    <h2>💳 Método de pago</h2>
+
+    <div class="metodos-pago">
+
+      <div class="grupo-pago">
+        <h3>Tarjeta crédito / débito</h3>
+        <label class="opcion-pago">
+          <input type="radio" name="pago" value="visa" />
+          <span>Visa</span>
+        </label>
+        <label class="opcion-pago">
+          <input type="radio" name="pago" value="mastercard" />
+          <span>MasterCard</span>
+        </label>
+      </div>
+
+      <div class="grupo-pago">
+        <h3>PSE / Transferencia</h3>
+        <label class="opcion-pago"><input type="radio" name="pago" value="bancolombia" /><span>Bancolombia</span></label>
+        <label class="opcion-pago"><input type="radio" name="pago" value="davivienda" /><span>Davivienda</span></label>
+        <label class="opcion-pago"><input type="radio" name="pago" value="bbva" /><span>BBVA</span></label>
+        <label class="opcion-pago"><input type="radio" name="pago" value="bogota" /><span>Banco de Bogotá</span></label>
+      </div>
+
+      <div class="grupo-pago">
+        <h3>Billeteras digitales</h3>
+        <label class="opcion-pago"><input type="radio" name="pago" value="nequi" /><span>Nequi</span></label>
+        <label class="opcion-pago"><input type="radio" name="pago" value="daviplata" /><span>Daviplata</span></label>
+      </div>
+
+    </div>
+
+    <div style="display:flex;gap:15px;margin-top:24px">
+
+  <button
+      id="btnVolverPago"
+      type="button"
+      style="background:#777;flex:1"
+      onclick="volverAlCarrito()">
+      ← Volver
+  </button>
+<div style="margin-top:25px;
+display:flex;
+align-items:flex-start;
+gap:10px;
+font-size:14px;
+line-height:1.5;">
+
+    <input
+        type="checkbox"
+        id="aceptaTerminos"
+        style="margin-top:3px; width:18px; height:18px;">
+
+    <label for="aceptaTerminos">
+
+        Acepto la
+        <strong>Política de Privacidad</strong>
+        y los
+        <strong>Términos y Condiciones</strong>,
+        y autorizo el tratamiento de mis datos personales.
+
+    </label>
+
+</div>
+  <button
+      id="btnPagar"
+      style="flex:1"
+      disabled
+      onclick="finalizarPago()">
+      Continuar con el pago
+  </button>
+
+</div>
+
+</div>   <!-- display:flex -->
+
+</div>   <!-- metodos-pago -->
+
+</div>   <!-- card pago -->
+
+<script>
+// Referencias DOM
+const confirmCard = document.getElementById('confirm');
+const resumen = document.getElementById('resumen');
+const btnConfirmar = document.getElementById('btnConfirmar');
+const localidadSelect = document.getElementById('localidad');
+const tituloLocalidad = document.getElementById('tituloLocalidad');
+
+const asientosPorFila = 30;
+const maxSeleccion = 6;
+const inicioX = 120;
+const separacionX = 22;
+const separacionY = 22;
+const radio = 8;
+
+let seleccionados = [];
+
+const mapas = {
+  'Occidental Baja': { svg: document.getElementById('mapaOccidentalBaja'), grupo: document.getElementById('asientosOccidentalBaja'), filas: 26, y: 40 },
+  'Occidental Alta': { svg: document.getElementById('mapaOccidentalAlta'), grupo: document.getElementById('asientosOccidentalAlta'), filas: 8, y: 90 },
+  'Oriental Baja': { svg: document.getElementById('mapaOrientalBaja'), grupo: document.getElementById('asientosOrientalBaja'), filas: 26, y: 40 },
+  'Oriental Alta': { svg: document.getElementById('mapaOrientalAlta'), grupo: document.getElementById('asientosOrientalAlta'), filas: 8, y: 90 },
+  'Norte Baja': { svg: document.getElementById('mapaNorteBaja'), grupo: document.getElementById('asientosNorteBaja'), filas: 11, y: 60 },
+  'Norte Alta': { svg: document.getElementById('mapaNorteAlta'), grupo: document.getElementById('asientosNorteAlta'), filas: 26, y: 40 }
+};
+const ocupacionLocalidad = {
+
+    "Occidental Baja": 0.45,
+
+    "Occidental Alta": 0.35,
+
+    "Oriental Baja": 0.28,
+
+    "Oriental Alta": 0.22,
+
+    "Norte Baja": 0.20,
+
+    "Norte Alta": 0.95
+
+};
+function habilitarLocalidad() {
+
+    const nombre = document.getElementById("nombre").value.trim();
+
+    const documento = document.getElementById("documento").value.trim();
+
+    const correo = document.getElementById("correo").value.trim();
+
+    const telefono = document.getElementById("telefono").value.trim();
+
+    if (nombre && documento && correo && telefono) {
+
+        localidadSelect.disabled = false;
+
+    } else {
+
+        localidadSelect.disabled = true;
+
+    }
+
+}
+localidadSelect.addEventListener('change', cambiarLocalidad);
+
+btnConfirmar.addEventListener('click', iniciarCarrito);
+
+document.getElementById("nombre").addEventListener("input", habilitarLocalidad);
+
+document.getElementById("documento").addEventListener("input", habilitarLocalidad);
+
+document.getElementById("correo").addEventListener("input", habilitarLocalidad);
+
+document.getElementById("telefono").addEventListener("input", habilitarLocalidad);
+function cambiarLocalidad() {
+  seleccionados = [];
+  confirmCard.style.display = 'none';
+  Object.values(mapas).forEach(m => m.svg.style.display = 'none');
+
+  const loc = localidadSelect.value;
+  const mapa = mapas[loc];
+  if (!mapa) return;
+
+  tituloLocalidad.innerText = loc;
+  mapa.svg.style.display = 'block';
+  dibujarAsientos(
+
+    mapa.grupo,
+
+    mapa.filas,
+
+    mapa.y,
+
+    ocupacionLocalidad[loc]
+
+);
+}
+
+function dibujarAsientos(
+
+grupo,
+
+filas,
+
+yInicial,
+
+porcentajeOcupacion
+
+) {
+  grupo.innerHTML = '';
+
+  for (let f = 0; f < filas; f++) {
+    const filaNumero = filas - f;
+
+    const labelFila = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    labelFila.setAttribute('x', inicioX - 40);
+    labelFila.setAttribute('y', yInicial + f * separacionY + 5);
+    labelFila.setAttribute('font-size', '12');
+    labelFila.setAttribute('fill', '#333');
+    labelFila.textContent = `F${filaNumero}`;
+    grupo.appendChild(labelFila);
+
+    for (let a = 0; a < asientosPorFila; a++) {
+      const cx = inicioX + a * separacionX;
+      const cy = yInicial + f * separacionY;
+
+      const seat = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      seat.setAttribute('cx', cx);
+      seat.setAttribute('cy', cy);
+      seat.setAttribute('r', radio);
+      seat.classList.add('seat');
+
+      seat.dataset.fila = filaNumero;
+      seat.dataset.asiento = a + 1;
+
+      if (Math.random() < porcentajeOcupacion) {
+        seat.classList.add('occupied');
+      } else {
+        seat.addEventListener('click', () => seleccionarAsiento(seat));
+      }
+
+      grupo.appendChild(seat);
+    }
+  }
+}
+
+function seleccionarAsiento(seat) {
+  if (seat.classList.contains('occupied')) return;
+
+  const idx = seleccionados.indexOf(seat);
+
+  if (idx >= 0) {
+    seat.classList.remove('selected');
+    seleccionados.splice(idx, 1);
+  } else {
+    if (seleccionados.length >= maxSeleccion) {
+      alert(`Puedes seleccionar máximo ${maxSeleccion} asientos`);
+      return;
+    }
+    seat.classList.add('selected');
+    seleccionados.push(seat);
+  }
+
+  actualizarResumen();
+}
+
+let tiempoRestante = 14 * 60;
+let intervalo = null;
+
+function iniciarCarrito() {
+  confirmCard.style.display = 'none';
+  document.getElementById('mapCard').style.display = 'none';
+  document.getElementById('carrito').style.display = 'block';
+  localidadSelect.disabled = true;
+  document.querySelectorAll('.seat').forEach(s => s.style.pointerEvents = 'none');
+
+  document.getElementById('mensajeCarrito').innerText =
+    'Boleta(s) añadida(s) a tu carrito de compras. Tienes 14 minutos para terminar tu compra.';
+
+  document.getElementById('carritoLocalidad').innerText = tituloLocalidad.innerText;
+
+  const lista = document.getElementById('listaAsientos');
+  lista.innerHTML = '';
+
+  seleccionados.forEach(s => {
+    const li = document.createElement('li');
+    li.innerText = `Fila ${s.dataset.fila} – Asiento ${s.dataset.asiento}`;
+    lista.appendChild(li);
+  });
+
+  document.getElementById('cantidadBoletas').innerText = seleccionados.length;
+
+  // PRECIOS POR TRIBUNA
+const precios = {
+  'Occidental Baja': 220000,
+  'Occidental Alta': 150000,
+  'Oriental Baja': 130000,
+  'Oriental Alta': 110000,
+  'Norte Baja': 90000,
+  'Norte Alta': 70000
+};
+
+const servicio = 10000;
+
+// Obtener localidad seleccionada
+const localidadActual = tituloLocalidad.innerText;
+
+// Obtener precio según localidad
+const precio = precios[localidadActual] || 0;
+document.getElementById('precioBoleta').innerText =
+precio.toLocaleString('es-CO');
+
+// Calcular total
+const total = (seleccionados.length * precio) +
+(seleccionados.length * servicio);
+
+document.getElementById('totalCompra').innerText = total.toLocaleString('es-CO');
+
+
+  tiempoRestante = 14 * 60;
+  actualizarTimer();
+  intervalo = setInterval(() => {
+    tiempoRestante--;
+    actualizarTimer();
+    if (tiempoRestante <= 0) clearInterval(intervalo);
+  }, 1000);
+}
+
+function actualizarTimer() {
+  const min = Math.floor(tiempoRestante / 60);
+  const seg = tiempoRestante % 60;
+  document.getElementById('timer').innerText = `Tiempo restante: ${min}:${seg.toString().padStart(2,'0')}`;
+}
+
+function modificarSeleccion() {
+  clearInterval(intervalo);
+  document.getElementById('carrito').style.display = 'none';
+  document.getElementById('mapCard').style.display = 'block';
+  confirmCard.style.display = 'block';
+  localidadSelect.disabled = false;
+  document.querySelectorAll('.seat').forEach(s => s.style.pointerEvents = 'auto');
+}
+
+function continuarPago() {
+  document.getElementById('carrito').style.display = 'none';
+  document.getElementById('pago').style.display = 'block';
+}
+
+
+function actualizarResumen() {
+  if (seleccionados.length === 0) {
+    confirmCard.style.display = 'none';
+    btnConfirmar.disabled = true;
+    resumen.innerText = '';
+    return;
+  }
+
+  const lista = seleccionados
+    .map(s => `Fila ${s.dataset.fila} - Asiento ${s.dataset.asiento}`)
+    .join('\n');
+
+  resumen.innerText = `${tituloLocalidad.innerText}\n\nAsientos seleccionados (${seleccionados.length}/${maxSeleccion}):\n${lista}`;
+  btnConfirmar.disabled = false;
+  confirmCard.style.display = 'block';
+}
+document.querySelectorAll('input[name="pago"]').forEach(radio => {
+
+    radio.addEventListener('change', () => {
+
+        btnPagar.disabled = false;
+
+        if (radio.value === "visa" || radio.value === "mastercard") {
+
+            document.getElementById("modalTarjeta").style.display = "flex";
+
+        }
+
+    });
+
+});
+
+function finalizarPago() {
+document.getElementById("modalAvisoPago").style.display="flex";
+
+return;
+
+  const datosCompra = {
+    nombre: document.getElementById('nombre').value,
+    cedula: document.getElementById('documento').value,
+    correo: document.getElementById('correo').value,
+    telefono: document.getElementById('telefono').value,
+    localidad: tituloLocalidad.innerText,
+    asientos: seleccionados.map(s => ({
+      fila: s.dataset.fila,
+      asiento: s.dataset.asiento
+    })),
+    total: parseInt(document.getElementById('totalCompra').innerText.replace(/\D/g, ''))
+  };
+
+  fetch('/api/compra', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(datosCompra)
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('modalPago').style.display = 'flex';
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error enviando la compra');
+  });
+
+}
+
+// Habilitar botón pagar solo cuando se seleccione un método
+const radiosPago = document.querySelectorAll('input[name="pago"]');
+
+const btnPagar = document.getElementById('btnPagar');
+
+const chkTerminos = document.getElementById("aceptaTerminos");
+
+function validarPago(){
+
+    const metodoSeleccionado =
+        document.querySelector('input[name="pago"]:checked');
+
+    btnPagar.disabled = !(metodoSeleccionado && chkTerminos.checked);
+
+}
+
+radiosPago.forEach(radio=>{
+
+    radio.addEventListener("change", validarPago);
+
+});
+
+chkTerminos.addEventListener("change", validarPago);
+function volverAlCarrito(){
+
+    document.getElementById("pago").style.display="none";
+
+    document.getElementById("carrito").style.display="block";
+
+}
+document.addEventListener("DOMContentLoaded", function () {
+    habilitarLocalidad();
+});
+function cerrarAvisoPago(){
+
+    document.getElementById("modalAvisoPago").style.display="none";
+
+    document.getElementById("pago").style.display="none";
+
+    document.getElementById("pantallaQR").style.display="block";
+
+    document.getElementById("valorQR").innerText =
+        "$" + document.getElementById("totalCompra").innerText + " COP";
+}
+{
+function cerrarModalTarjeta() {
+
+    const modal = document.getElementById("modalTarjeta");
+
+    modal.style.display = "none";
+
+}
+
+}
+function confirmarPago(){
+
+    document.getElementById("pantallaQR").style.display = "none";
+
+    document.getElementById("modalVerificando").style.display = "flex";
+
+    setTimeout(function(){
+
+        document.getElementById("modalVerificando").style.display = "none";
+
+        alert("Pago verificado correctamente. Suministrar el soporte de pago con el asesor, gracias por tu confianza");
+
+    },3000);
+
+}
+</script>
+<div id="modalAvisoPago"
+style="display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.6);
+justify-content:center;
+align-items:center;
+z-index:9999;">
+
+<div style="
+background:white;
+width:420px;
+max-width:90%;
+padding:30px;
+border-radius:18px;
+text-align:center;
+box-shadow:0 10px 40px rgba(0,0,0,.35);">
+
+<h2 style="margin-top:0; color:#000; font-size:32px; font-weight:bold;">
+¡IMPORTANTE!
+</h2>
+
+<p style="line-height:1.7;">
+
+Después de realizar el debido pago,
+las entradas adquiridas serán enviadas
+al correo electrónico registrado.
+
+<br><br>
+
+Para una mayor información o si tienes
+algún inconveniente con tu compra,
+contacta con un asesor de la compañía.
+
+</p>
+
+<button
+onclick="cerrarAvisoPago()"
+style="
+margin-top:20px;
+padding:12px 30px;
+background:black;
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;">
+
+Entendido
+
+</button>
+
+</div>
+
+</div>
+<div id="pantallaQR" class="card" style="display:none">
+
+    <h2 style="text-align:center;">Finalizar pago</h2>
+
+    <p style="text-align:center;">
+        Escanea el siguiente código QR para realizar el pago de tus entradas.
+    </p>
+
+    <div style="display:flex;justify-content:center;margin:30px 0;">
+
+        <img
+src="codigo.png"
+style="width:260px;height:260px;">
+
+    </div>
+
+    <h3 style="text-align:center;">Valor a pagar</h3>
+
+    <h2 id="valorQR" style="text-align:center;">
+        $0 COP
+    </h2>
+
+    <p style="text-align:center;color:#666;margin-top:25px;">
+
+        Compatible con:
+
+        Bancolombia • Nequi • Daviplata • Davivienda • BBVA • Banco de Bogotá
+
+    </p>
+
+    <button
+        style="margin-top:25px;"
+        onclick="confirmarPago()">
+
+        Ya realicé el pago
+
+    </button>
+
+</div>
+<div id="modalVerificando"
+     style="display:none;
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.65);
+            justify-content:center;
+            align-items:center;
+            z-index:99999;">
+
+    <div style="background:#fff;
+                width:430px;
+                padding:35px;
+                border-radius:18px;
+                text-align:center;
+                box-shadow:0 15px 40px rgba(0,0,0,.25);">
+
+        <div style="font-size:55px;margin-bottom:15px;">
+            ⏳
+        </div>
+
+        <h2 style="margin-bottom:15px;">
+            Verificando pago...
+        </h2>
+
+        <p style="font-size:17px;color:#555;line-height:1.7;">
+            Estamos validando la información.<br><br>
+            Este proceso puede tardar unos segundos.
+        </p>
+
+    </div>
+
+</div>
+<div id="modalTarjeta" class="modalTarjeta">
+
+    <div class="contenidoTarjeta">
+
+        <h2>¡Importante!</h2>
+
+        <p>
+
+            Actualmente los pagos con Visa y MasterCard
+            se encuentran en proceso de integración.
+
+            Nuestro equipo validará la información y
+            posteriormente se comunicará contigo para
+            finalizar la compra.
+
+        </p>
+
+        <button type="button" onclick="cerrarModalTarjeta(); return false;">
+    Entendido
+</button>
+
+    </div>
+
+</div>
+</body>
+</html>
