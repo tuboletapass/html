@@ -96,8 +96,8 @@ margin-bottom:25px;
 </head>
 <body>
 
-<h1> Estadio El Campín </h1>
-<p style="text-align:center">Selección de asientos por localidad</p>
+<h1> RYAN CASTRO SENDÉ WORLD TOUR THE LAST DANCE - CALI </h1>
+<p style="text-align:center">Estadio Pascual Guerrero   Sabado 22 Agosto 2026    18:00</p>
 
 <div class="container">
 
@@ -140,12 +140,12 @@ margin-bottom:25px;
     <h2>Localidad</h2>
     <select id="localidad" disabled>
       <option value="" selected disabled>Seleccione una tribuna</option>
-      <option value="Occidental Baja">Occidental Baja</option>
-      <option value="Occidental Alta">Occidental Alta</option>
-      <option value="Oriental Baja">Oriental Baja</option>
-      <option value="Oriental Alta">Oriental Alta</option>
-      <option value="Norte Baja">Norte Baja</option>
-      <option value="Norte Alta">Norte Alta</option>
+      <option value="OCCIDENTAL 1ER PISO - BOTAPAFO">OCCIDENTAL 1ER PISO - BOTAPAFO</option>
+      <option value="OCCIDENTAL 2DO PISO - BOMBASTIK">OCCIDENTAL 2DO PISO - BOMBASTIK</option>
+      <option value="OCCIDENTAL 3ER PISO - MODO LEYENDA "MENORES"">OCCIDENTAL 3ER PISO - MODO LEYENDA "MENORES"</option>
+      <option value="ORIENTAL 1ER - AY MI PAPÁ">ORIENTAL 1ER - AY MI PAPÁ</option>
+      <option value="ORIENTAL 2DO - MENOS EL CORA">ORIENTAL 2DO - MENOS EL CORA</option>
+      <option value="Norte - OJALA ">Norte - OJALA</option>
     </select>
   </div>
 
@@ -157,12 +157,12 @@ margin-bottom:25px;
     </div>
     <h2 id="tituloLocalidad"></h2>
 
-    <svg id="mapaOccidentalBaja" viewBox="0 0 1000 700" style="display:none"><g id="asientosOccidentalBaja"></g></svg>
-    <svg id="mapaOccidentalAlta" viewBox="0 0 1000 600" style="display:none"><g id="asientosOccidentalAlta"></g></svg>
-    <svg id="mapaOrientalBaja" viewBox="0 0 1000 700" style="display:none"><g id="asientosOrientalBaja"></g></svg>
-    <svg id="mapaOrientalAlta" viewBox="0 0 1000 600" style="display:none"><g id="asientosOrientalAlta"></g></svg>
-    <svg id="mapaNorteBaja" viewBox="0 0 1000 650" style="display:none"><g id="asientosNorteBaja"></g></svg>
-    <svg id="mapaNorteAlta" viewBox="0 0 1000 750" style="display:none"><g id="asientosNorteAlta"></g></svg>
+    <svg id="mapaOCCIDENTAL 1ER PISO - BOTAPAFO" viewBox="0 0 1000 700" style="display:none"><g id="asientosOCCIDENTAL 1ER PISO - BOTAPAFO"></g></svg>
+    <svg id="mapaOCCIDENTAL 2DO PISO - BOMBASTIK" viewBox="0 0 1000 600" style="display:none"><g id="asientosOCCIDENTAL 2DO PISO - BOMBASTIK"></g></svg>
+    <svg id="mapaOCCIDENTAL 3ER PISO - MODO LEYENDA "MENORES"" viewBox="0 0 1000 700" style="display:none"><g id="asientosOCCIDENTAL 3ER PISO - MODO LEYENDA "MENORES""></g></svg>
+    <svg id="mapaORIENTAL 1ER - AY MI PAPÁ" viewBox="0 0 1000 600" style="display:none"><g id="asientosORIENTAL 1ER - AY MI PAPÁ"></g></svg>
+    <svg id="mapaORIENTAL 2DO - MENOS EL CORA" viewBox="0 0 1000 650" style="display:none"><g id="asientosORIENTAL 2DO - MENOS EL CORA"></g></svg>
+    <svg id="mapaNORTE - OJALA" viewBox="0 0 1000 750" style="display:none"><g id="asientosNORTE - OJALA"></g></svg>
   </div>
 
   <div class="card" id="confirm" style="display:none">
@@ -186,7 +186,7 @@ margin-bottom:25px;
 
     <div style="margin-top:15px">
       <p>Precio por boleta: <strong>$<span id="precioBoleta"></span></strong></p>
-      <p>Servicio: <strong>$10.000</strong></p>
+      <p>Servicio: <strong>$15.000</strong></p>
       <h3>TOTAL: $<span id="totalCompra"></span> COP</h3>
     </div>
 
@@ -297,26 +297,26 @@ const radio = 8;
 let seleccionados = [];
 
 const mapas = {
-  'Occidental Baja': { svg: document.getElementById('mapaOccidentalBaja'), grupo: document.getElementById('asientosOccidentalBaja'), filas: 26, y: 40 },
-  'Occidental Alta': { svg: document.getElementById('mapaOccidentalAlta'), grupo: document.getElementById('asientosOccidentalAlta'), filas: 8, y: 90 },
-  'Oriental Baja': { svg: document.getElementById('mapaOrientalBaja'), grupo: document.getElementById('asientosOrientalBaja'), filas: 26, y: 40 },
-  'Oriental Alta': { svg: document.getElementById('mapaOrientalAlta'), grupo: document.getElementById('asientosOrientalAlta'), filas: 8, y: 90 },
-  'Norte Baja': { svg: document.getElementById('mapaNorteBaja'), grupo: document.getElementById('asientosNorteBaja'), filas: 11, y: 60 },
-  'Norte Alta': { svg: document.getElementById('mapaNorteAlta'), grupo: document.getElementById('asientosNorteAlta'), filas: 26, y: 40 }
+  'OCCIDENTAL 1ER PISO - BOTAPAFO': { svg: document.getElementById('mapaOCCIDENTAL 1ER PISO - BOTAPAFO'), grupo: document.getElementById('asientosOCCIDENTAL 1ER PISO - BOTAPAFO'), filas: 26, y: 40 },
+  'OCCIDENTAL 2DO PISO - BOMBASTIK': { svg: document.getElementById('mapaOCCIDENTAL 2DO PISO - BOMBASTIK'), grupo: document.getElementById('asientosOCCIDENTAL 2DO PISO - BOMBASTIK'), filas: 8, y: 90 },
+  'OCCIDENTAL 3ER PISO - MODO LEYENDA "MENORES"': { svg: document.getElementById('mapaOCCIDENTAL 3ER PISO - MODO LEYENDA "MENORES"'), grupo: document.getElementById('asientosOCCIDENTAL 3ER PISO - MODO LEYENDA "MENORES"'), filas: 26, y: 40 },
+  'ORIENTAL 1ER - AY MI PAPÁ': { svg: document.getElementById('mapaORIENTAL 1ER - AY MI PAPÁ'), grupo: document.getElementById('asientosORIENTAL 1ER - AY MI PAPÁ'), filas: 8, y: 90 },
+  'ORIENTAL 2DO - MENOS EL CORA': { svg: document.getElementById('mapaORIENTAL 2DO - MENOS EL CORA'), grupo: document.getElementById('asientosORIENTAL 2DO - MENOS EL CORA'), filas: 11, y: 60 },
+  'NORTE - OJALA': { svg: document.getElementById('mapaNORTE - OJALA'), grupo: document.getElementById('asientosNORTE - OJALA'), filas: 26, y: 40 }
 };
 const ocupacionLocalidad = {
 
-    "Occidental Baja": 0.45,
+    "OCCIDENTAL 1ER PISO - BOTAPAFO": 0.80,
 
-    "Occidental Alta": 0.35,
+    "OCCIDENTAL 2DO PISO - BOMBASTIK": 0.60,
 
-    "Oriental Baja": 0.28,
+    "OCCIDENTAL 3ER PISO - MODO LEYENDA "MENORES"": 0.60,
 
-    "Oriental Alta": 0.22,
+    "ORIENTAL 1ER - AY MI PAPÁ": 0.75,
 
-    "Norte Baja": 0.20,
+    "ORIENTAL 2DO - MENOS EL CORA": 0.70,
 
-    "Norte Alta": 0.95
+    "NORTE - OJALA": 0.85
 
 };
 function habilitarLocalidad() {
@@ -471,15 +471,15 @@ function iniciarCarrito() {
 
   // PRECIOS POR TRIBUNA
 const precios = {
-  'Occidental Baja': 220000,
-  'Occidental Alta': 150000,
-  'Oriental Baja': 130000,
-  'Oriental Alta': 110000,
-  'Norte Baja': 90000,
-  'Norte Alta': 70000
+  'OCCIDENTAL 1ER PISO - BOTAPAFO': 280000,
+  'OCCIDENTAL 2DO PISO - BOMBASTIK': 310000,
+  'OCCIDENTAL 3ER PISO - MODO LEYENDA "MENORES"': 280000,
+  'ORIENTAL 1ER - AY MI PAPÁ': 230000,
+  'ORIENTAL 2DO - MENOS EL CORA': 165000,
+  'NORTE - OJALA': 120000
 };
 
-const servicio = 10000;
+const servicio = 15000;
 
 // Obtener localidad seleccionada
 const localidadActual = tituloLocalidad.innerText;
@@ -691,9 +691,7 @@ box-shadow:0 10px 40px rgba(0,0,0,.35);">
 
 <p style="line-height:1.7;">
 
-Después de realizar el debido pago,
-las entradas adquiridas serán enviadas
-al correo electrónico registrado.
+Para asistir a este evento, tus boletas individuales serán cargadas próximamente, en la app Tuboleta Pass..
 
 <br><br>
 
@@ -732,7 +730,7 @@ Entendido
     <div style="display:flex;justify-content:center;margin:30px 0;">
 
         <img
-src="codigo.png"
+src="BOLD.png"
 style="width:260px;height:260px;">
 
     </div>
